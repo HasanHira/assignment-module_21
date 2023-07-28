@@ -20,6 +20,20 @@ class JWTToken
         return JWT::encode($payload, $key, 'HS256');
     }
 
+
+    public static function TokenForResetPassword($userEmail):string{
+        $key = env('JWT_KEY');
+        $payload = [
+            'iss' => 'Todo_Api',
+            'iat' => time(),
+            'exp' => time() + 60*60,
+            'userEmail' => $userEmail
+        ];
+
+        return JWT::encode($payload, $key, 'HS256');
+    }
+
+
     public static function VerifyToken($token):string{
 
         try{
