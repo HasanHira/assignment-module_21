@@ -39,17 +39,16 @@ class UserController extends Controller
 
         $count = User::where('email', '=', $request->input('email'))
         ->where('password', '=', $request->input('password'))
-        ->count();
+        ->select('id')->first();
 
-        if($count == 1){
+        if($count !== null){
             //Issu token
-            $token = JWTToken::CreateToken($request->input('email'));
+            $token = JWTToken::CreateToken($request->input('email'), $count->id);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'User Login Successful',
-                'token' => $token
-            ]);
+                'message' => 'User Login Successful'
+            ])->cookie('token', $token, 60*60*24);
         } else {
 
             return response()->json([
@@ -90,15 +89,14 @@ class UserController extends Controller
         $otp = $request->input('otp');
         $count = User::where('email', '=', $email)->where('otp', '=', $otp)->count();
 
-        if($count == 1){
+        if($count == 4){
             User::where('email', '=', $email)->update(['otp' => '0']);
 
             $token = JWTToken::TokenForResetPassword($request->input('email'));
             return response()->json([
                 'status' => 'success',
-                'message' => 'OTP Verify Successful',
-                'token' => $token
-            ]);
+                'message' => 'OTP Verify Successful'
+            ])->cookie('token', $token, 60*5);
         }
         else{
             return response()->json([
